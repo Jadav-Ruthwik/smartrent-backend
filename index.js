@@ -7,11 +7,9 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB Connection
-mongoose.connect('mongodb://127.0.0.1:27017/smartrent', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-}).then(() => console.log("MongoDB Connected"))
-  .catch(err => console.error(err));
+mongoose.connect(process.env.MONGO_URL)
+  .then(() => console.log("MongoDB Connected"))
+  .catch((err) => console.error("MongoDB connection error:", err));
 
 // Schema & Model
 const ListingSchema = new mongoose.Schema({
@@ -44,7 +42,7 @@ app.post('/chat', async (req, res) => {
   if (message.includes('ameerpet')) query.location = /ameerpet/i;
   if (message.includes('madhapur')) query.location = /madhapur/i;
   if (message.includes('cheap') || message.includes('under') || message.includes('below 10000'))
-    query.price = /[5-9],?\d{2,3}/i; // very basic filtering
+    query.price = /[5-9],?\d{2,3}/i;
 
   const results = await Listing.find(query);
   if (results.length === 0) {
@@ -54,8 +52,8 @@ app.post('/chat', async (req, res) => {
   const reply = results.map(l => `${l.title} in ${l.location} for ${l.price}`).join('\n');
   res.json({ reply });
 });
-
+const PORT = process.env.PORT || 5000;
 // Server Start
-app.listen(5000, () => {
-  console.log('Backend running on http://localhost:5000');
+app.listen(PORT, () => {
+  console.log(`Backend running on port ${PORT}`);
 });
